@@ -88,7 +88,9 @@ export default function AppPage() {
             <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="w-full mb-2 rounded-md border px-3 py-2" />
             <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Content" className="w-full mb-3 rounded-md border px-3 py-2 h-24" />
             <button onClick={createNote} disabled={isLimited} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50">Create</button>
-            {isFree && <p className="text-xs text-muted-foreground mt-2">Free plan limited to 3 notes per tenant for members.</p>}
+            {isFree && isMember && (
+              <p className="text-xs text-muted-foreground mt-2">Free plan limited to 3 notes per tenant for members.</p>
+            )}
           </div>
           <div className="bg-white border rounded-xl p-4">
             <h2 className="font-semibold mb-2">Notes ({notes.length})</h2>
