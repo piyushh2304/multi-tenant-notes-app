@@ -19,9 +19,21 @@ export default function AppPage() {
   const [error, setError] = useState("");
 
   async function loadNotes() {
-    const res = await fetch("/api/notes", { headers: { Authorization: `Bearer ${session.token}` } });
-    const data = await res.json();
-    setNotes(data);
+    if (!session?.token) return;
+    try {
+      const url = new URL('/api/notes', window.location.origin).toString();
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${session.token}` } });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Failed to load notes: ${res.status}`);
+        return;
+      }
+      const data = await res.json();
+      setNotes(data);
+    } catch (err: any) {
+      console.error('Network error loading notes', err);
+      setError('Network error loading notes. Please check your connection or server.');
+    }
   }
 
   useEffect(() => {
