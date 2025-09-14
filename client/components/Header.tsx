@@ -10,7 +10,7 @@ export default function Header({ tenant, user, onLogout }: { tenant?: any; user?
         </motion.a>
         <div className="flex items-center gap-3 text-sm">
           {tenant && (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-lavender-50 text-lavender-700">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent text-accent-foreground">
               <span className="font-medium">{tenant.name}</span>
               <span className="opacity-70">• {tenant.plan?.toUpperCase()}</span>
             </div>
