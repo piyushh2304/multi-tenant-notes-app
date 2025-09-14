@@ -38,6 +38,13 @@ export default function AppPage() {
 
   useEffect(() => {
     if (session?.token) loadNotes();
+    const qp = new URLSearchParams(window.location.search);
+    if (qp.get('checkout') === 'success' && localStorage.getItem('upgrade-intent') === '1') {
+      localStorage.removeItem('upgrade-intent');
+      if (session?.user?.role === 'admin') {
+        upgrade();
+      }
+    }
   }, [session?.token]);
 
   async function createNote() {
@@ -104,6 +111,7 @@ export default function AppPage() {
   const isFree = session?.tenant?.plan === "free";
   const isMember = session?.user?.role === "member";
   const isLimited = isFree && isMember && notes.length >= 3;
+  const [showBilling, setShowBilling] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,6 +151,55 @@ export default function AppPage() {
           </div>
         </div>
       </main>
+
+      {showBilling && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowBilling(false)} />
+          <div className="relative z-10 w-full max-w-3xl mx-4 bg-white rounded-2xl border shadow-xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold">Choose a plan</h3>
+              <button onClick={() => setShowBilling(false)} className="text-sm px-2 py-1 rounded-md border hover:bg-accent">Close</button>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="border rounded-xl p-5">
+                <h4 className="text-lg font-semibold">Basic</h4>
+                <p className="text-sm text-muted-foreground mb-4">Free plan with up to 3 notes for members.</p>
+                <div className="text-3xl font-extrabold">$0</div>
+                <button disabled className="mt-4 px-4 py-2 rounded-md border opacity-60 cursor-not-allowed">Current</button>
+              </div>
+              <div className="border rounded-xl p-5">
+                <h4 className="text-lg font-semibold">Pro</h4>
+                <p className="text-sm text-muted-foreground mb-4">Unlimited notes for everyone in your tenant.</p>
+                <div className="text-3xl font-extrabold">$5</div>
+                <button onClick={async () => {
+                  if (!session?.tenant?.slug) return;
+                  try {
+                    const res = await fetch(new URL('/api/billing/checkout', window.location.origin).toString(), {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ plan: 'pro', tenantSlug: session.tenant.slug })
+                    });
+                    const data = await res.json();
+                    if (data.url) {
+                      localStorage.setItem('upgrade-intent', '1');
+                      window.location.href = data.url;
+                    } else {
+                      if (session?.user?.role === 'admin') {
+                        await upgrade();
+                      } else {
+                        alert('Payment not available. Please ask your admin to upgrade.');
+                      }
+                    }
+                  } catch (e) {
+                    alert('Unable to start checkout');
+                  }
+                }} className="mt-4 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Purchase</button>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-4">Test mode. Use Stripe test cards when prompted.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
