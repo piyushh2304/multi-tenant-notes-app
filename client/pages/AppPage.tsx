@@ -50,6 +50,11 @@ export default function AppPage() {
       if (session?.user?.role === 'admin') {
         upgrade();
       }
+    } else if (qp.has('checkout')) {
+      // Clean stale checkout params to avoid re-triggering
+      const url = new URL(window.location.href);
+      url.searchParams.delete('checkout');
+      window.history.replaceState({}, '', url.toString());
     }
   }, [session?.token]);
 
@@ -131,7 +136,12 @@ export default function AppPage() {
       if (res.ok) {
         const updated = { ...session, tenant: { ...session.tenant, plan: data.plan } };
         localStorage.setItem("session", JSON.stringify(updated));
-        window.location.reload();
+        setShowBilling(false);
+        // remove checkout params and refresh data without full reload
+        const url = new URL(window.location.href);
+        url.searchParams.delete('checkout');
+        window.history.replaceState({}, '', url.toString());
+        await loadNotes();
       } else {
         alert(data.error || "Upgrade failed");
       }
