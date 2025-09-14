@@ -85,8 +85,8 @@ export default function AppPage() {
   async function removeNote(id: string) {
     if (!session?.token) return setError('No session');
     try {
-      const url = new URL(`/api/notes/${id}`, window.location.origin).toString();
-      const res = await fetch(url, { method: "DELETE", headers: { Authorization: `Bearer ${session.token}` } });
+      const url = apiUrl(`/api/notes/${id}`);
+      const res = await fetch(url, { method: "DELETE", headers: { Authorization: `Bearer ${session.token}` }, mode: 'cors' });
       if (res.status === 401) {
         localStorage.removeItem('session');
         window.location.href = '/?expired=1';
