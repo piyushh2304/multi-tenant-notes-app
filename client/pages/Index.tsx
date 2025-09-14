@@ -34,11 +34,12 @@ export default function Index() {
     setLoading(true);
     setError("");
     try {
-      const url = new URL('/api/auth/login', window.location.origin).toString();
+      const url = apiUrl('/api/auth/login');
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        mode: 'cors'
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Login failed (${res.status})`);
