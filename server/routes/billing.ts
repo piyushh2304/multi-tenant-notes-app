@@ -7,7 +7,9 @@ const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2024-06-20
 
 export const getStripeConfig = (_req: Request, res: Response) => {
   const publishableKey = process.env.STRIPE_PUBLISHABLE || "";
-  return res.json({ publishableKey: publishableKey || null, enabled: Boolean(stripe) });
+  const paymentLinkBasic = process.env.STRIPE_LINK_BASIC || null;
+  const paymentLinkPro = process.env.STRIPE_LINK_PRO || null;
+  return res.json({ publishableKey: publishableKey || null, enabled: Boolean(stripe), paymentLinkBasic, paymentLinkPro });
 };
 
 export const createCheckout: any = async (req: Request, res: Response) => {
