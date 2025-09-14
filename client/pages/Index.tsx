@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
+import { apiUrl } from "@/lib/api";
 
 const TEST_USERS = [
   { email: "admin@acme.test", tenantSlug: "acme", label: "Acme Admin" },
