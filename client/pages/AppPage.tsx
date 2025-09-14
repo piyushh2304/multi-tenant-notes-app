@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
+import { apiUrl } from "@/lib/api";
 
 function useSession() {
   const [session, setSession] = useState<any | null>(null);
