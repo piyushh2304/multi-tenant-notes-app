@@ -64,6 +64,8 @@ export default function AppPage() {
   }
 
   const isFree = session?.tenant?.plan === "free";
+  const isMember = session?.user?.role === "member";
+  const isLimited = isFree && isMember && notes.length >= 3;
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,8 +73,12 @@ export default function AppPage() {
       <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Your Notes</h1>
-          {isFree && notes.length >= 3 && session?.user?.role === "admin" && (
-            <button onClick={upgrade} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Upgrade to Pro</button>
+          {(isFree && notes.length >= 3) && (
+            session?.user?.role === "admin" ? (
+              <button onClick={upgrade} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Upgrade to Pro</button>
+            ) : (
+              <button onClick={async () => { alert("Only admins can upgrade. Please ask your admin."); }} className="px-4 py-2 rounded-md border hover:bg-accent">Upgrade to Pro</button>
+            )
           )}
         </div>
         <div className="grid md:grid-cols-2 gap-6">
@@ -81,8 +87,8 @@ export default function AppPage() {
             {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
             <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="w-full mb-2 rounded-md border px-3 py-2" />
             <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Content" className="w-full mb-3 rounded-md border px-3 py-2 h-24" />
-            <button onClick={createNote} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Create</button>
-            {isFree && <p className="text-xs text-muted-foreground mt-2">Free plan limited to 3 notes per tenant.</p>}
+            <button onClick={createNote} disabled={isLimited} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50">Create</button>
+            {isFree && <p className="text-xs text-muted-foreground mt-2">Free plan limited to 3 notes per tenant for members.</p>}
           </div>
           <div className="bg-white border rounded-xl p-4">
             <h2 className="font-semibold mb-2">Notes ({notes.length})</h2>
