@@ -23,6 +23,11 @@ export default function AppPage() {
     try {
       const url = new URL('/api/notes', window.location.origin).toString();
       const res = await fetch(url, { headers: { Authorization: `Bearer ${session.token}` } });
+      if (res.status === 401) {
+        localStorage.removeItem('session');
+        window.location.href = '/?expired=1';
+        return;
+      }
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setError(data.error || `Failed to load notes: ${res.status}`);
@@ -58,6 +63,11 @@ export default function AppPage() {
         body: JSON.stringify({ title, content }),
       });
       const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        localStorage.removeItem('session');
+        window.location.href = '/?expired=1';
+        return;
+      }
       if (!res.ok) {
         setError(data.error || "Failed to create note");
         return;
@@ -76,6 +86,11 @@ export default function AppPage() {
     try {
       const url = new URL(`/api/notes/${id}`, window.location.origin).toString();
       const res = await fetch(url, { method: "DELETE", headers: { Authorization: `Bearer ${session.token}` } });
+      if (res.status === 401) {
+        localStorage.removeItem('session');
+        window.location.href = '/?expired=1';
+        return;
+      }
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setError(data.error || 'Failed to delete');
@@ -95,6 +110,11 @@ export default function AppPage() {
       const url = new URL(`/api/tenants/${tenantSlug}/upgrade`, window.location.origin).toString();
       const res = await fetch(url, { method: "POST", headers: { Authorization: `Bearer ${session.token}` } });
       const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        localStorage.removeItem('session');
+        window.location.href = '/?expired=1';
+        return;
+      }
       if (res.ok) {
         const updated = { ...session, tenant: { ...session.tenant, plan: data.plan } };
         localStorage.setItem("session", JSON.stringify(updated));
