@@ -32,10 +32,17 @@ export function createServer() {
   app.post("/api/auth/login", loginHandler);
   app.post("/api/auth/signup", signupHandler);
   app.post("/api/tenants/:slug/invite", authMiddleware, requireRole("admin"), inviteHandler);
+  // Non-prefixed aliases
+  app.post("/auth/login", loginHandler);
+  app.post("/auth/signup", signupHandler);
+  app.post("/tenants/:slug/invite", authMiddleware, requireRole("admin"), inviteHandler);
 
   // Tenants
   app.get("/api/tenants/me", authMiddleware, getMeTenant);
   app.post("/api/tenants/:slug/upgrade", authMiddleware, requireRole("admin"), upgradeTenant);
+  // Non-prefixed aliases
+  app.get("/tenants/me", authMiddleware, getMeTenant);
+  app.post("/tenants/:slug/upgrade", authMiddleware, requireRole("admin"), upgradeTenant);
 
   // Notes
   app.post("/api/notes", authMiddleware, createNote);
@@ -43,6 +50,12 @@ export function createServer() {
   app.get("/api/notes/:id", authMiddleware, getNote);
   app.put("/api/notes/:id", authMiddleware, updateNote);
   app.delete("/api/notes/:id", authMiddleware, deleteNote);
+  // Non-prefixed aliases
+  app.post("/notes", authMiddleware, createNote);
+  app.get("/notes", authMiddleware, listNotes);
+  app.get("/notes/:id", authMiddleware, getNote);
+  app.put("/notes/:id", authMiddleware, updateNote);
+  app.delete("/notes/:id", authMiddleware, deleteNote);
 
   return app;
 }
