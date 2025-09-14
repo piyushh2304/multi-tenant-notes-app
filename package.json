@@ -21,8 +21,13 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.1",
+    "stripe": "^16.5.0",
+    "uuid": "^11.0.3",
     "zod": "^3.25.76"
   },
   "devDependencies": {
