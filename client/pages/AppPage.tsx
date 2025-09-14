@@ -112,11 +112,7 @@ export default function AppPage() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Your Notes</h1>
           {(isFree && notes.length >= 3) && (
-            session?.user?.role === "admin" ? (
-              <button onClick={upgrade} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Upgrade to Pro</button>
-            ) : (
-              <button onClick={async () => { alert("Only admins can upgrade. Please ask your admin."); }} className="px-4 py-2 rounded-md border hover:bg-accent">Upgrade to Pro</button>
-            )
+            <button onClick={() => setShowBilling(true)} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Upgrade to Pro</button>
           )}
         </div>
         <div className="grid md:grid-cols-2 gap-6">
