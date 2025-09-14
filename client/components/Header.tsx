@@ -21,7 +21,7 @@ export default function Header({ tenant, user, onLogout }: { tenant?: any; user?
             </div>
           )}
           {onLogout && (
-            <button onClick={onLogout} className="px-3 py-1.5 rounded-md bg-lavender-600 text-white hover:bg-lavender-700 transition-colors">
+            <button onClick={onLogout} className="px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:opacity-90 transition-colors">
               Logout
             </button>
           )}
