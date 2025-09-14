@@ -56,11 +56,12 @@ export default function AppPage() {
     setError("");
     if (!session?.token) return setError('No session');
     try {
-      const url = new URL('/api/notes', window.location.origin).toString();
+      const url = apiUrl('/api/notes');
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.token}` },
         body: JSON.stringify({ title, content }),
+        mode: 'cors'
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
