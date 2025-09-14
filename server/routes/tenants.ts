@@ -7,7 +7,8 @@ const stripeSecret = process.env.STRIPE_SECRET || "";
 const stripe = stripeSecret ? new Stripe(stripeSecret, { apiVersion: "2024-06-20" }) : null;
 
 export const getMeTenant: any = (req: Request & { user?: AuthPayload }, res: Response) => {
-  const tenant = db.tenants.find((t) => t.id === req.user!.tenantId)!;
+  const tenant = db.tenants.find((t) => t.id === req.user!.tenantId);
+  if (!tenant) return res.status(401).json({ error: "Session expired. Please sign in again." });
   return res.json({ slug: tenant.slug, name: tenant.name, plan: tenant.plan });
 };
 
@@ -15,6 +16,7 @@ export const upgradeTenant: any = async (req: Request & { user?: AuthPayload }, 
   const slug = req.params.slug;
   const tenant = findTenantBySlug(slug);
   if (!tenant) return res.status(404).json({ error: "Tenant not found" });
+  if (!req.user || !db.tenants.find((t) => t.id === req.user!.tenantId)) return res.status(401).json({ error: "Session expired. Please sign in again." });
   if (tenant.id !== req.user!.tenantId) return res.status(403).json({ error: "Cannot upgrade another tenant" });
 
   // Stripe integration is optional in test env; if secret is present, create a PaymentIntent in test mode
