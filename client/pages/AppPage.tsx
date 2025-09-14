@@ -108,8 +108,8 @@ export default function AppPage() {
     if (!session?.token) return setError('No session');
     const tenantSlug = session.tenant.slug;
     try {
-      const url = new URL(`/api/tenants/${tenantSlug}/upgrade`, window.location.origin).toString();
-      const res = await fetch(url, { method: "POST", headers: { Authorization: `Bearer ${session.token}` } });
+      const url = apiUrl(`/api/tenants/${tenantSlug}/upgrade`);
+      const res = await fetch(url, { method: "POST", headers: { Authorization: `Bearer ${session.token}` }, mode: 'cors' });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
         localStorage.removeItem('session');
