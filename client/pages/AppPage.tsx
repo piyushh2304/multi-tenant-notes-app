@@ -53,6 +53,17 @@ export default function AppPage() {
     }
   }, [session?.token]);
 
+  useEffect(() => {
+    async function loadStripeCfg() {
+      try {
+        const res = await fetch(apiUrl('/api/stripe/config'), { mode: 'cors' });
+        const cfg = await res.json().catch(() => ({}));
+        setStripeCfg(cfg);
+      } catch {}
+    }
+    if (showBilling) loadStripeCfg();
+  }, [showBilling]);
+
   async function createNote() {
     setError("");
     if (!session?.token) return setError('No session');
@@ -134,6 +145,7 @@ export default function AppPage() {
   const isMember = session?.user?.role === "member";
   const isLimited = isFree && isMember && notes.length >= 3;
   const [showBilling, setShowBilling] = useState(false);
+  const [stripeCfg, setStripeCfg] = useState<any>(null);
 
   return (
     <div className="min-h-screen bg-background">
@@ -187,37 +199,45 @@ export default function AppPage() {
                 <h4 className="text-lg font-semibold">Basic</h4>
                 <p className="text-sm text-muted-foreground mb-4">Free plan with up to 3 notes for members.</p>
                 <div className="text-3xl font-extrabold">$0</div>
-                <button disabled className="mt-4 px-4 py-2 rounded-md border opacity-60 cursor-not-allowed">Current</button>
+                {stripeCfg?.paymentLinkBasic ? (
+                  <a href={stripeCfg.paymentLinkBasic} className="mt-4 inline-block px-4 py-2 rounded-md border hover:bg-accent">Purchase</a>
+                ) : (
+                  <button disabled className="mt-4 px-4 py-2 rounded-md border opacity-60 cursor-not-allowed">Current</button>
+                )}
               </div>
               <div className="border rounded-xl p-5">
                 <h4 className="text-lg font-semibold">Pro</h4>
                 <p className="text-sm text-muted-foreground mb-4">Unlimited notes for everyone in your tenant.</p>
                 <div className="text-3xl font-extrabold">$5</div>
-                <button onClick={async () => {
-                  if (!session?.tenant?.slug) return;
-                  try {
-                    const url = apiUrl('/api/billing/checkout');
-                    const res = await fetch(url, {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ plan: 'pro', tenantSlug: session.tenant.slug }),
-                      mode: 'cors'
-                    });
-                    const data = await res.json().catch(() => ({}));
-                    if (data.url) {
-                      localStorage.setItem('upgrade-intent', '1');
-                      window.location.href = data.url;
-                    } else {
-                      if (session?.user?.role === 'admin') {
-                        await upgrade();
+                {stripeCfg?.paymentLinkPro ? (
+                  <a href={stripeCfg.paymentLinkPro} className="mt-4 inline-block px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Purchase</a>
+                ) : (
+                  <button onClick={async () => {
+                    if (!session?.tenant?.slug) return;
+                    try {
+                      const url = apiUrl('/api/billing/checkout');
+                      const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ plan: 'pro', tenantSlug: session.tenant.slug }),
+                        mode: 'cors'
+                      });
+                      const data = await res.json().catch(() => ({}));
+                      if (data.url) {
+                        localStorage.setItem('upgrade-intent', '1');
+                        window.location.href = data.url;
                       } else {
-                        alert('Payment not available. Please ask your admin to upgrade.');
+                        if (session?.user?.role === 'admin') {
+                          await upgrade();
+                        } else {
+                          alert('Payment not available. Please ask your admin to upgrade.');
+                        }
                       }
+                    } catch (e) {
+                      alert('Unable to start checkout');
                     }
-                  } catch (e) {
-                    alert('Unable to start checkout');
-                  }
-                }} className="mt-4 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Purchase</button>
+                  }} className="mt-4 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Purchase</button>
+                )}
               </div>
             </div>
             <p className="text-xs text-muted-foreground mt-4">Test mode. Use Stripe test cards when prompted.</p>
