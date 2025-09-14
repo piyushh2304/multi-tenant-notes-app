@@ -1,0 +1,106 @@
+import { useEffect, useState } from "react";
+import Header from "@/components/Header";
+
+function useSession() {
+  const [session, setSession] = useState<any | null>(null);
+  useEffect(() => {
+    const s = localStorage.getItem("session");
+    if (s) setSession(JSON.parse(s));
+    else window.location.href = "/";
+  }, []);
+  return session;
+}
+
+export default function AppPage() {
+  const session = useSession();
+  const [notes, setNotes] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [error, setError] = useState("");
+
+  async function loadNotes() {
+    const res = await fetch("/api/notes", { headers: { Authorization: `Bearer ${session.token}` } });
+    const data = await res.json();
+    setNotes(data);
+  }
+
+  useEffect(() => {
+    if (session?.token) loadNotes();
+  }, [session?.token]);
+
+  async function createNote() {
+    setError("");
+    const res = await fetch("/api/notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.token}` },
+      body: JSON.stringify({ title, content }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Failed to create note");
+      return;
+    }
+    setTitle("");
+    setContent("");
+    loadNotes();
+  }
+
+  async function removeNote(id: string) {
+    await fetch(`/api/notes/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${session.token}` } });
+    loadNotes();
+  }
+
+  async function upgrade() {
+    const tenantSlug = session.tenant.slug;
+    const res = await fetch(`/api/tenants/${tenantSlug}/upgrade`, { method: "POST", headers: { Authorization: `Bearer ${session.token}` } });
+    const data = await res.json();
+    if (res.ok) {
+      const updated = { ...session, tenant: { ...session.tenant, plan: data.plan } };
+      localStorage.setItem("session", JSON.stringify(updated));
+      window.location.reload();
+    } else {
+      alert(data.error || "Upgrade failed");
+    }
+  }
+
+  const isFree = session?.tenant?.plan === "free";
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header tenant={session?.tenant} user={session?.user} onLogout={() => { localStorage.removeItem("session"); window.location.href = "/"; }} />
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Your Notes</h1>
+          {isFree && notes.length >= 3 && session?.user?.role === "admin" && (
+            <button onClick={upgrade} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Upgrade to Pro</button>
+          )}
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-white border rounded-xl p-4">
+            <h2 className="font-semibold mb-2">Create Note</h2>
+            {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title" className="w-full mb-2 rounded-md border px-3 py-2" />
+            <textarea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Content" className="w-full mb-3 rounded-md border px-3 py-2 h-24" />
+            <button onClick={createNote} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Create</button>
+            {isFree && <p className="text-xs text-muted-foreground mt-2">Free plan limited to 3 notes per tenant.</p>}
+          </div>
+          <div className="bg-white border rounded-xl p-4">
+            <h2 className="font-semibold mb-2">Notes ({notes.length})</h2>
+            <ul className="space-y-3">
+              {notes.map((n) => (
+                <li key={n.id} className="border rounded-lg p-3 flex items-start justify-between">
+                  <div>
+                    <div className="font-semibold">{n.title}</div>
+                    <div className="text-sm text-muted-foreground whitespace-pre-wrap">{n.content}</div>
+                  </div>
+                  <button onClick={() => removeNote(n.id)} className="text-sm text-red-600 hover:underline">Delete</button>
+                </li>
+              ))}
+              {notes.length === 0 && <li className="text-sm text-muted-foreground">No notes yet.</li>}
+            </ul>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
