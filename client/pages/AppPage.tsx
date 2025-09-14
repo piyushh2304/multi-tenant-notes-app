@@ -196,12 +196,14 @@ export default function AppPage() {
                 <button onClick={async () => {
                   if (!session?.tenant?.slug) return;
                   try {
-                    const res = await fetch(new URL('/api/billing/checkout', window.location.origin).toString(), {
+                    const url = apiUrl('/api/billing/checkout');
+                    const res = await fetch(url, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ plan: 'pro', tenantSlug: session.tenant.slug })
+                      body: JSON.stringify({ plan: 'pro', tenantSlug: session.tenant.slug }),
+                      mode: 'cors'
                     });
-                    const data = await res.json();
+                    const data = await res.json().catch(() => ({}));
                     if (data.url) {
                       localStorage.setItem('upgrade-intent', '1');
                       window.location.href = data.url;
