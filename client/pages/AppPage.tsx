@@ -21,8 +21,8 @@ export default function AppPage() {
   async function loadNotes() {
     if (!session?.token) return;
     try {
-      const url = new URL('/api/notes', window.location.origin).toString();
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${session.token}` } });
+      const url = apiUrl('/api/notes');
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${session.token}` }, mode: 'cors' });
       if (res.status === 401) {
         localStorage.removeItem('session');
         window.location.href = '/?expired=1';
