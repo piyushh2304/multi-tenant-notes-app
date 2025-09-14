@@ -42,19 +42,26 @@ export default function AppPage() {
 
   async function createNote() {
     setError("");
-    const res = await fetch("/api/notes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.token}` },
-      body: JSON.stringify({ title, content }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data.error || "Failed to create note");
-      return;
+    if (!session?.token) return setError('No session');
+    try {
+      const url = new URL('/api/notes', window.location.origin).toString();
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.token}` },
+        body: JSON.stringify({ title, content }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || "Failed to create note");
+        return;
+      }
+      setTitle("");
+      setContent("");
+      loadNotes();
+    } catch (err: any) {
+      console.error('Network error creating note', err);
+      setError('Network error creating note.');
     }
-    setTitle("");
-    setContent("");
-    loadNotes();
   }
 
   async function removeNote(id: string) {
