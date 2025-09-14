@@ -34,17 +34,19 @@ export default function Index() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/auth/login", {
+      const url = new URL('/api/auth/login', window.location.origin).toString();
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Login failed");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Login failed (${res.status})`);
       localStorage.setItem("session", JSON.stringify(data));
       window.location.href = "/app";
     } catch (err: any) {
-      setError(err.message);
+      console.error('Login error', err);
+      setError(err.message || 'Network error');
     } finally {
       setLoading(false);
     }
