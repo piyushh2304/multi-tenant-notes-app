@@ -65,20 +65,39 @@ export default function AppPage() {
   }
 
   async function removeNote(id: string) {
-    await fetch(`/api/notes/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${session.token}` } });
-    loadNotes();
+    if (!session?.token) return setError('No session');
+    try {
+      const url = new URL(`/api/notes/${id}`, window.location.origin).toString();
+      const res = await fetch(url, { method: "DELETE", headers: { Authorization: `Bearer ${session.token}` } });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || 'Failed to delete');
+        return;
+      }
+      loadNotes();
+    } catch (err: any) {
+      console.error('Network error deleting note', err);
+      setError('Network error deleting note.');
+    }
   }
 
   async function upgrade() {
+    if (!session?.token) return setError('No session');
     const tenantSlug = session.tenant.slug;
-    const res = await fetch(`/api/tenants/${tenantSlug}/upgrade`, { method: "POST", headers: { Authorization: `Bearer ${session.token}` } });
-    const data = await res.json();
-    if (res.ok) {
-      const updated = { ...session, tenant: { ...session.tenant, plan: data.plan } };
-      localStorage.setItem("session", JSON.stringify(updated));
-      window.location.reload();
-    } else {
-      alert(data.error || "Upgrade failed");
+    try {
+      const url = new URL(`/api/tenants/${tenantSlug}/upgrade`, window.location.origin).toString();
+      const res = await fetch(url, { method: "POST", headers: { Authorization: `Bearer ${session.token}` } });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        const updated = { ...session, tenant: { ...session.tenant, plan: data.plan } };
+        localStorage.setItem("session", JSON.stringify(updated));
+        window.location.reload();
+      } else {
+        alert(data.error || "Upgrade failed");
+      }
+    } catch (err: any) {
+      console.error('Network error during upgrade', err);
+      alert('Network error during upgrade');
     }
   }
 
