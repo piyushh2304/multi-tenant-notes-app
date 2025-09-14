@@ -93,13 +93,15 @@ export default function Index() {
               setLoading(true);
               setError("");
               try {
-                const res = await fetch("/api/auth/signup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password, tenantSlug }) });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Signup failed");
+                const url = new URL('/api/auth/signup', window.location.origin).toString();
+                const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password, tenantSlug }) });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || `Signup failed (${res.status})`);
                 localStorage.setItem("session", JSON.stringify(data));
                 window.location.href = "/app";
               } catch (err: any) {
-                setError(err.message);
+                console.error('Signup error', err);
+                setError(err.message || 'Network error');
               } finally {
                 setLoading(false);
               }
