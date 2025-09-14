@@ -21,6 +21,13 @@ export default function Index() {
     const session = localStorage.getItem("session");
     if (session) {
       window.location.href = "/app";
+      return;
+    }
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('expired') === '1') {
+      setError('Session expired. Please sign in again.');
+      url.searchParams.delete('expired');
+      window.history.replaceState({}, '', url.toString());
     }
   }, []);
 
