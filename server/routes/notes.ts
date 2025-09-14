@@ -5,8 +5,9 @@ import { AuthPayload } from "./auth";
 export const createNote: any = (req: Request & { user?: AuthPayload }, res: Response) => {
   const user = req.user!;
   const tenant = db.tenants.find((t) => t.id === user.tenantId)!;
-  if (isFreePlanLimited(tenant) && notesCountForTenant(tenant.id) >= 3) {
-    return res.status(402).json({ error: "Free plan limit reached. Upgrade to Pro." });
+  // Limit only members on Free plan
+  if (user.role === "member" && isFreePlanLimited(tenant) && notesCountForTenant(tenant.id) >= 3) {
+    return res.status(402).json({ error: "Free plan limit reached for members. Upgrade to Pro." });
   }
   const { title, content } = req.body as { title: string; content: string };
   const now = Date.now();
