@@ -6,6 +6,7 @@ import { seedIfEmpty } from "./data/store";
 import { authMiddleware, loginHandler, requireRole, signupHandler, inviteHandler } from "./routes/auth";
 import { createNote, deleteNote, getNote, listNotes, updateNote } from "./routes/notes";
 import { getMeTenant, upgradeTenant } from "./routes/tenants";
+import { getStripeConfig, createCheckout } from "./routes/billing";
 
 export function createServer() {
   const app = express();
@@ -56,6 +57,13 @@ export function createServer() {
   app.get("/notes/:id", authMiddleware, getNote);
   app.put("/notes/:id", authMiddleware, updateNote);
   app.delete("/notes/:id", authMiddleware, deleteNote);
+
+  // Billing / Stripe
+  app.get("/api/stripe/config", getStripeConfig);
+  app.post("/api/billing/checkout", createCheckout);
+  // Non-prefixed aliases
+  app.get("/stripe/config", getStripeConfig);
+  app.post("/billing/checkout", createCheckout);
 
   return app;
 }
