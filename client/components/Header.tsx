@@ -5,8 +5,8 @@ export default function Header({ tenant, user, onLogout }: { tenant?: any; user?
     <header className="w-full border-b bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50">
       <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
         <motion.a href="/" whileHover={{ scale: 1.02 }} className="text-lg font-extrabold tracking-tight">
-          <span className="text-lavender-700">Multi</span>
-          <span className="text-gray-900">Notes</span>
+          <span className="text-primary">Multi</span>
+          <span className="text-foreground">Notes</span>
         </motion.a>
         <div className="flex items-center gap-3 text-sm">
           {tenant && (
