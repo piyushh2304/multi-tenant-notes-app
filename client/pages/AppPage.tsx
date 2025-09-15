@@ -164,6 +164,8 @@ export default function AppPage() {
   }, [showBilling]);
 
   useEffect(() => {
+    // Only navigate away if we've finished loading session and it's explicitly null
+    if (session === undefined) return;
     if (session === null) {
       navigate('/', { replace: true });
     }
