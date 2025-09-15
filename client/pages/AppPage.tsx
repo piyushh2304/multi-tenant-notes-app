@@ -224,7 +224,7 @@ export default function AppPage() {
                 <p className="text-sm text-muted-foreground mb-4">Free plan with up to 3 notes for members.</p>
                 <div className="text-3xl font-extrabold">$0</div>
                 {stripeCfg?.paymentLinkBasic ? (
-                  <a href={stripeCfg.paymentLinkBasic} className="mt-4 inline-block px-4 py-2 rounded-md border hover:bg-accent">Purchase</a>
+                  <a href={stripeCfg.paymentLinkBasic} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block px-4 py-2 rounded-md border hover:bg-accent">Purchase</a>
                 ) : (
                   <button disabled className="mt-4 px-4 py-2 rounded-md border opacity-60 cursor-not-allowed">Current</button>
                 )}
@@ -234,7 +234,7 @@ export default function AppPage() {
                 <p className="text-sm text-muted-foreground mb-4">Unlimited notes for everyone in your tenant.</p>
                 <div className="text-3xl font-extrabold">$5</div>
                 {stripeCfg?.paymentLinkPro ? (
-                  <a href={stripeCfg.paymentLinkPro} className="mt-4 inline-block px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Purchase</a>
+                  <a href={stripeCfg.paymentLinkPro} target="_blank" rel="noopener noreferrer" className="mt-4 inline-block px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Purchase</a>
                 ) : (
                   <button onClick={async () => {
                     if (!session?.tenant?.slug) return;
@@ -249,7 +249,7 @@ export default function AppPage() {
                       const data = await res.json().catch(() => ({}));
                       if (data.url) {
                         localStorage.setItem('upgrade-intent', '1');
-                        window.location.href = data.url;
+                        window.open(data.url, '_blank', 'noopener');
                       } else {
                         if (session?.user?.role === 'admin') {
                           await upgrade();
