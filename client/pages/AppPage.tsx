@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { apiUrl } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 function useSession() {
   const [session, setSession] = useState<any | null>(null);
