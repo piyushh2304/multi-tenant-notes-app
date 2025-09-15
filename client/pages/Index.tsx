@@ -54,7 +54,7 @@ export default function Index() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || `Login failed (${res.status})`);
       localStorage.setItem("session", JSON.stringify(data));
-      window.location.href = "/app";
+      navigate("/app", { replace: true });
     } catch (err: any) {
       console.error('Login error', err);
       setError(err.message || 'Network error');
@@ -109,7 +109,7 @@ export default function Index() {
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || `Signup failed (${res.status})`);
                 localStorage.setItem("session", JSON.stringify(data));
-                window.location.href = "/app";
+                navigate("/app", { replace: true });
               } catch (err: any) {
                 console.error('Signup error', err);
                 setError(err.message || 'Network error');
