@@ -8,7 +8,7 @@ function useSession() {
   useEffect(() => {
     const s = localStorage.getItem("session");
     if (s) setSession(JSON.parse(s));
-    else window.location.href = "/";
+    else setSession(null);
   }, []);
   return session;
 }
