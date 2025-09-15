@@ -14,6 +14,7 @@ function useSession() {
 }
 
 export default function AppPage() {
+  const navigate = useNavigate();
   const session = useSession();
   const [notes, setNotes] = useState<any[]>([]);
   const [title, setTitle] = useState("");
