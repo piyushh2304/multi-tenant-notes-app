@@ -7,8 +7,8 @@
       "runtime": "nodejs20.x"
     }
   },
-   "rewrites": [
-  { "source": "/((?!api).*)", "destination": "/" }
-]
-
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }
