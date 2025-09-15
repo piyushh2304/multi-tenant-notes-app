@@ -46,7 +46,7 @@ export default function Index() {
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, tenantSlug }),
         mode: 'cors'
       });
       const data = await res.json().catch(() => ({}));
