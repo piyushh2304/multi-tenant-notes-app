@@ -3,11 +3,11 @@
   "buildCommand": "pnpm install --no-frozen-lockfile && pnpm build",
   "outputDirectory": "dist/spa",
   "functions": {
-    "api/**/*.ts": {
+    "api/**/*.js": {
       "runtime": "nodejs20.x"
     }
   },
-  "rewrites": [
+   "rewrites": [
   { "source": "/((?!api).*)", "destination": "/" }
 ]
 
