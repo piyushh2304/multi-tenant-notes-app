@@ -31,7 +31,7 @@ export default function Index() {
       url.searchParams.delete('expired');
       window.history.replaceState({}, '', url.toString());
     }
-  }, [navigate]);
+  }, []);
 
   const quickFill = (u: { email: string; tenantSlug: string }) => {
     setEmail(u.email);
