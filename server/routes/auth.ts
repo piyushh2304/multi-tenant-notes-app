@@ -17,11 +17,17 @@ export function signToken(payload: AuthPayload) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 }
 
-export function authMiddleware(req: Request & { user?: AuthPayload }, res: Response, next: NextFunction) {
+export function authMiddleware(
+  req: Request & { user?: AuthPayload },
+  res: Response,
+  next: NextFunction,
+) {
   const auth = req.headers.authorization;
-  if (!auth) return res.status(401).json({ error: "Missing Authorization header" });
+  if (!auth)
+    return res.status(401).json({ error: "Missing Authorization header" });
   const [, token] = auth.split(" ");
-  if (!token) return res.status(401).json({ error: "Invalid Authorization header" });
+  if (!token)
+    return res.status(401).json({ error: "Invalid Authorization header" });
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as AuthPayload;
     req.user = decoded;
@@ -32,7 +38,11 @@ export function authMiddleware(req: Request & { user?: AuthPayload }, res: Respo
 }
 
 export function requireRole(role: "admin" | "member") {
-  return (req: Request & { user?: AuthPayload }, res: Response, next: NextFunction) => {
+  return (
+    req: Request & { user?: AuthPayload },
+    res: Response,
+    next: NextFunction,
+  ) => {
     if (!req.user) return res.status(401).json({ error: "Unauthenticated" });
     if (role === "admin" && req.user.role !== "admin") {
       return res.status(403).json({ error: "Admin role required" });
@@ -42,37 +52,61 @@ export function requireRole(role: "admin" | "member") {
 }
 
 export const loginHandler = (req: Request, res: Response) => {
-  const { email, password, tenantSlug } = req.body as { email: string; password: string; tenantSlug?: string };
-  console.log('[auth] login attempt', { email, tenantSlug });
+  const { email, password, tenantSlug } = req.body as {
+    email: string;
+    password: string;
+    tenantSlug?: string;
+  };
+  console.log("[auth] login attempt", { email, tenantSlug });
 
   // If tenantSlug provided, use it to scope the user lookup
   let tenantId: string | undefined;
   if (tenantSlug) {
     const t = db.tenants.find((x) => x.slug === tenantSlug);
     if (!t) {
-      return res.status(400).json({ error: 'Invalid tenant' });
+      return res.status(400).json({ error: "Invalid tenant" });
     }
     tenantId = t.id;
   }
 
-  const user = db.users.find((u) => u.email.toLowerCase() === String(email || "").toLowerCase() && (tenantId ? u.tenantId === tenantId : true));
+  const user = db.users.find(
+    (u) =>
+      u.email.toLowerCase() === String(email || "").toLowerCase() &&
+      (tenantId ? u.tenantId === tenantId : true),
+  );
   if (!user) {
-    console.log('[auth] user not found for', email);
+    console.log("[auth] user not found for", email);
     return res.status(401).json({ error: "Invalid credentials" });
   }
   const ok = bcrypt.compareSync(password, user.passwordHash);
   if (!ok) {
-    console.log('[auth] invalid password for', email);
+    console.log("[auth] invalid password for", email);
     return res.status(401).json({ error: "Invalid credentials" });
   }
-  const token = signToken({ userId: user.id, tenantId: user.tenantId, role: user.role });
+  const token = signToken({
+    userId: user.id,
+    tenantId: user.tenantId,
+    role: user.role,
+  });
   const tenant = db.tenants.find((t) => t.id === user.tenantId)!;
-  console.log('[auth] login success', { email, userId: user.id, tenant: tenant.slug });
-  return res.json({ token, user: { id: user.id, email: user.email, role: user.role }, tenant: { slug: tenant.slug, name: tenant.name, plan: tenant.plan } });
+  console.log("[auth] login success", {
+    email,
+    userId: user.id,
+    tenant: tenant.slug,
+  });
+  return res.json({
+    token,
+    user: { id: user.id, email: user.email, role: user.role },
+    tenant: { slug: tenant.slug, name: tenant.name, plan: tenant.plan },
+  });
 };
 
 export const signupHandler = (req: Request, res: Response) => {
-  const { email, password, tenantSlug } = req.body as { email: string; password: string; tenantSlug: string };
+  const { email, password, tenantSlug } = req.body as {
+    email: string;
+    password: string;
+    tenantSlug: string;
+  };
   const tenant = findTenantBySlug(tenantSlug);
   if (!tenant) return res.status(400).json({ error: "Invalid tenant" });
   if (db.users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
@@ -86,12 +120,28 @@ export const signupHandler = (req: Request, res: Response) => {
     tenantId: tenant.id,
   };
   db.users.push(user);
-  const token = signToken({ userId: user.id, tenantId: user.tenantId, role: user.role });
-  return res.status(201).json({ token, user: { id: user.id, email: user.email, role: user.role }, tenant: { slug: tenant.slug, name: tenant.name, plan: tenant.plan } });
+  const token = signToken({
+    userId: user.id,
+    tenantId: user.tenantId,
+    role: user.role,
+  });
+  return res
+    .status(201)
+    .json({
+      token,
+      user: { id: user.id, email: user.email, role: user.role },
+      tenant: { slug: tenant.slug, name: tenant.name, plan: tenant.plan },
+    });
 };
 
-export const inviteHandler = (req: Request & { user?: AuthPayload }, res: Response) => {
-  const { email, role } = req.body as { email: string; role: "admin" | "member" };
+export const inviteHandler = (
+  req: Request & { user?: AuthPayload },
+  res: Response,
+) => {
+  const { email, role } = req.body as {
+    email: string;
+    role: "admin" | "member";
+  };
   if (!req.user) return res.status(401).json({ error: "Unauthenticated" });
   const tenantId = req.user.tenantId;
   if (db.users.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
@@ -105,5 +155,10 @@ export const inviteHandler = (req: Request & { user?: AuthPayload }, res: Respon
     tenantId,
   };
   db.users.push(user);
-  return res.status(201).json({ message: "User invited", user: { id: user.id, email: user.email, role: user.role } });
+  return res
+    .status(201)
+    .json({
+      message: "User invited",
+      user: { id: user.id, email: user.email, role: user.role },
+    });
 };
