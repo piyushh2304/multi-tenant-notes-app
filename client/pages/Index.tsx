@@ -17,11 +17,12 @@ export default function Index() {
   const [tenantSlug, setTenantSlug] = useState("acme");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const session = localStorage.getItem("session");
     if (session) {
-      window.location.href = "/app";
+      navigate("/app", { replace: true });
       return;
     }
     const url = new URL(window.location.href);
@@ -30,7 +31,7 @@ export default function Index() {
       url.searchParams.delete('expired');
       window.history.replaceState({}, '', url.toString());
     }
-  }, []);
+  }, [navigate]);
 
   const quickFill = (u: { email: string; tenantSlug: string }) => {
     setEmail(u.email);
