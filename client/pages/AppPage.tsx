@@ -28,7 +28,7 @@ export default function AppPage() {
       const res = await fetch(url, { headers: { Authorization: `Bearer ${session.token}` }, mode: 'cors' });
       if (res.status === 401) {
         localStorage.removeItem('session');
-        window.location.href = '/?expired=1';
+        navigate('/?expired=1', { replace: true });
         return;
       }
       if (!res.ok) {
@@ -85,7 +85,7 @@ export default function AppPage() {
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
         localStorage.removeItem('session');
-        window.location.href = '/?expired=1';
+        navigate('/?expired=1', { replace: true });
         return;
       }
       if (!res.ok) {
@@ -108,7 +108,7 @@ export default function AppPage() {
       const res = await fetch(url, { method: "DELETE", headers: { Authorization: `Bearer ${session.token}` }, mode: 'cors' });
       if (res.status === 401) {
         localStorage.removeItem('session');
-        window.location.href = '/?expired=1';
+        navigate('/?expired=1', { replace: true });
         return;
       }
       if (!res.ok) {
@@ -132,7 +132,7 @@ export default function AppPage() {
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) {
         localStorage.removeItem('session');
-        window.location.href = '/?expired=1';
+        navigate('/?expired=1', { replace: true });
         return;
       }
       if (res.ok) {
@@ -159,9 +159,15 @@ export default function AppPage() {
   const [showBilling, setShowBilling] = useState(false);
   const [stripeCfg, setStripeCfg] = useState<any>(null);
 
+  useEffect(() => {
+    if (session === null) {
+      navigate('/', { replace: true });
+    }
+  }, [session, navigate]);
+
   return (
     <div className="min-h-screen bg-background">
-      <Header tenant={session?.tenant} user={session?.user} onLogout={() => { localStorage.removeItem("session"); window.location.href = "/"; }} />
+      <Header tenant={session?.tenant} user={session?.user} onLogout={() => { localStorage.removeItem("session"); navigate('/'); }} />
       <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Your Notes</h1>
