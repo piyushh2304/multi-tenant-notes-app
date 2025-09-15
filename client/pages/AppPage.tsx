@@ -60,16 +60,6 @@ export default function AppPage() {
     }
   }, [session?.token]);
 
-  useEffect(() => {
-    async function loadStripeCfg() {
-      try {
-        const res = await fetch(apiUrl('/api/stripe/config'), { mode: 'cors' });
-        const cfg = await res.json().catch(() => ({}));
-        setStripeCfg(cfg);
-      } catch {}
-    }
-    if (showBilling) loadStripeCfg();
-  }, [showBilling]);
 
   async function createNote() {
     setError("");
@@ -158,6 +148,19 @@ export default function AppPage() {
   const isLimited = isFree && isMember && notes.length >= 3;
   const [showBilling, setShowBilling] = useState(false);
   const [stripeCfg, setStripeCfg] = useState<any>(null);
+
+  useEffect(() => {
+    async function loadStripeCfg() {
+      try {
+        const res = await fetch(apiUrl('/api/stripe/config'), { mode: 'cors' });
+        const cfg = await res.json().catch(() => ({}));
+        setStripeCfg(cfg);
+      } catch (e) {
+        console.error('Failed to load stripe config', e);
+      }
+    }
+    if (showBilling) loadStripeCfg();
+  }, [showBilling]);
 
   useEffect(() => {
     if (session === null) {
