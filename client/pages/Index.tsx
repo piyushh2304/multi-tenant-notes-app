@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import { apiUrl } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 const TEST_USERS = [
   { email: "admin@acme.test", tenantSlug: "acme", label: "Acme Admin" },
