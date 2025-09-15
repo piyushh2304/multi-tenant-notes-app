@@ -42,13 +42,32 @@ export function requireRole(role: "admin" | "member") {
 }
 
 export const loginHandler = (req: Request, res: Response) => {
-  const { email, password } = req.body as { email: string; password: string };
-  const user = db.users.find((u) => u.email.toLowerCase() === String(email || "").toLowerCase());
-  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+  const { email, password, tenantSlug } = req.body as { email: string; password: string; tenantSlug?: string };
+  console.log('[auth] login attempt', { email, tenantSlug });
+
+  // If tenantSlug provided, use it to scope the user lookup
+  let tenantId: string | undefined;
+  if (tenantSlug) {
+    const t = db.tenants.find((x) => x.slug === tenantSlug);
+    if (!t) {
+      return res.status(400).json({ error: 'Invalid tenant' });
+    }
+    tenantId = t.id;
+  }
+
+  const user = db.users.find((u) => u.email.toLowerCase() === String(email || "").toLowerCase() && (tenantId ? u.tenantId === tenantId : true));
+  if (!user) {
+    console.log('[auth] user not found for', email);
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
   const ok = bcrypt.compareSync(password, user.passwordHash);
-  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+  if (!ok) {
+    console.log('[auth] invalid password for', email);
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
   const token = signToken({ userId: user.id, tenantId: user.tenantId, role: user.role });
   const tenant = db.tenants.find((t) => t.id === user.tenantId)!;
+  console.log('[auth] login success', { email, userId: user.id, tenant: tenant.slug });
   return res.json({ token, user: { id: user.id, email: user.email, role: user.role }, tenant: { slug: tenant.slug, name: tenant.name, plan: tenant.plan } });
 };
 
