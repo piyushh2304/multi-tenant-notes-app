@@ -4,7 +4,8 @@ import { apiUrl } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 
 function useSession() {
-  const [session, setSession] = useState<any | null>(null);
+  // undefined = loading, null = no session, object = session
+  const [session, setSession] = useState<any | undefined>(undefined);
   useEffect(() => {
     const s = localStorage.getItem("session");
     if (s) setSession(JSON.parse(s));
