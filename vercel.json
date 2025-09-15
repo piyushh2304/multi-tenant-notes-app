@@ -4,7 +4,7 @@
   "outputDirectory": "dist/spa",
   "functions": {
     "api/**/*.ts": {
-      "runtime": "vercel-nodejs@4.0.0"
+      "runtime": "nodejs20.x"
     }
   },
   "rewrites": [
