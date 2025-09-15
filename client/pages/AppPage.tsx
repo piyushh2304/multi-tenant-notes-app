@@ -177,7 +177,7 @@ export default function AppPage() {
       <main className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Your Notes</h1>
-          {(isFree && notes.length >= 3) && (
+          {(isFree && isMember && notes.length >= 3) && (
             <button onClick={() => setShowBilling(true)} className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:opacity-90">Upgrade to Pro</button>
           )}
         </div>
