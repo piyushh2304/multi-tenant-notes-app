@@ -7,7 +7,5 @@
       "runtime": "nodejs20.x"
     }
   },
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
