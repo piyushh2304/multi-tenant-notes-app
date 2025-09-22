@@ -9,6 +9,6 @@
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index" },
-    { "source": "/((?!api).*)", "destination": "/" }
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
